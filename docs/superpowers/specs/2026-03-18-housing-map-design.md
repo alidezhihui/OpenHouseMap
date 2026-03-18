@@ -117,6 +117,8 @@ DELETE /api/amenities/:id                               → 204
 
 POST   /api/floor-plans/:floorPlanId/photos             multipart/form-data → Photo
 DELETE /api/photos/:id                                  → 204 (also deletes file)
+
+GET    /uploads/:filename                               → static file (Express static middleware)
 ```
 
 **GET /api/pins** returns the full nested structure for the logged-in user — pins with their floor plans, each floor plan with its amenities and photo URLs. This is the main data load on app startup.
