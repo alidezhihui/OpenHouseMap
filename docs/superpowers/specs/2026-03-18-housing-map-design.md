@@ -21,7 +21,7 @@ People actively searching for apartments who want to visualize options geographi
 - **Auth:** Passport.js with email/password (JWT tokens)
 - **Map tiles:** Leaflet + OpenStreetMap (free, no API key)
 - **Geocoding:** Nominatim (OpenStreetMap's free geocoding API) for address search
-- **File storage:** Local filesystem for uploaded images (with path stored in DB)
+- **Image storage:** Stored directly in PostgreSQL as binary data (Prisma `Bytes` type). No separate filesystem needed — works with cloud-hosted databases.
 
 **Project structure:**
 ```
@@ -84,13 +84,14 @@ AmenityItem
 Photo
   id          UUID (PK)
   floorPlanId UUID (FK → FloorPlan)
-  filename    String          -- stored filename
+  data        Bytes           -- image binary data stored directly in DB
+  mimeType    String          -- e.g. "image/jpeg", "image/png"
   originalName String         -- user's original filename
   sortOrder   Integer
   createdAt   DateTime
 ```
 
-**Cascade deletes:** Deleting a Pin deletes all its FloorPlans. Deleting a FloorPlan deletes all its AmenityItems and Photos (and the files on disk).
+**Cascade deletes:** Deleting a Pin deletes all its FloorPlans. Deleting a FloorPlan deletes all its AmenityItems and Photos.
 
 **Default amenities for new floor plans:** AC, Heating, Dishwasher, In-unit Laundry, Parking, Gym (all unchecked). Users can add/remove items per floor plan.
 
@@ -116,9 +117,8 @@ POST   /api/floor-plans/:floorPlanId/amenities          { label } → AmenityIte
 DELETE /api/amenities/:id                               → 204
 
 POST   /api/floor-plans/:floorPlanId/photos             multipart/form-data → Photo
-DELETE /api/photos/:id                                  → 204 (also deletes file)
-
-GET    /uploads/:filename                               → static file (Express static middleware)
+GET    /api/photos/:id/image                            → binary image data (with correct Content-Type)
+DELETE /api/photos/:id                                  → 204
 ```
 
 **GET /api/pins** returns the full nested structure for the logged-in user — pins with their floor plans, each floor plan with its amenities and photo URLs. This is the main data load on app startup.
@@ -165,11 +165,11 @@ Both methods open the edit panel for the new pin with one empty floor plan tab.
 ## Image Upload
 
 - Images uploaded as multipart/form-data to the server
-- Server stores files in an `uploads/` directory with UUID filenames
-- Database stores the filename and original name
-- Images served via `GET /uploads/:filename` (Express static middleware)
+- Server stores image binary data directly in PostgreSQL (`Bytes` column)
+- Images served via `GET /api/photos/:id/image` which reads from DB and responds with the correct `Content-Type` header
 - Max file size: 10MB per image
 - Accepted formats: JPEG, PNG, WebP
+- **GET /api/pins** returns photo metadata (id, originalName) but not the binary data — images are loaded on demand via their individual endpoints
 
 ## Error Handling
 
