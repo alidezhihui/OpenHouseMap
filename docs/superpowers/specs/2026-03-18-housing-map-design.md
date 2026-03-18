@@ -21,7 +21,7 @@ People actively searching for apartments who want to visualize options geographi
 - **Auth:** Passport.js with email/password (JWT tokens)
 - **Map tiles:** Leaflet + OpenStreetMap (free, no API key)
 - **Geocoding:** Nominatim (OpenStreetMap's free geocoding API) for address search
-- **Image storage:** Stored directly in PostgreSQL as binary data (Prisma `Bytes` type). No separate filesystem needed — works with cloud-hosted databases.
+- **Image storage:** Cloud object storage (S3/GCS/Azure Blob) for image files, metadata (URL, filename) in PostgreSQL. Use presigned URLs for uploads and reads.
 
 **Project structure:**
 ```
@@ -84,7 +84,8 @@ AmenityItem
 Photo
   id          UUID (PK)
   floorPlanId UUID (FK → FloorPlan)
-  data        Bytes           -- image binary data stored directly in DB
+  storageKey  String          -- object key in cloud storage (e.g. "photos/{uuid}.jpg")
+  url         String          -- public or presigned URL for the image
   mimeType    String          -- e.g. "image/jpeg", "image/png"
   originalName String         -- user's original filename
   sortOrder   Integer
@@ -116,9 +117,8 @@ PUT    /api/amenities/:id                               { checked?, label? } →
 POST   /api/floor-plans/:floorPlanId/amenities          { label } → AmenityItem
 DELETE /api/amenities/:id                               → 204
 
-POST   /api/floor-plans/:floorPlanId/photos             multipart/form-data → Photo
-GET    /api/photos/:id/image                            → binary image data (with correct Content-Type)
-DELETE /api/photos/:id                                  → 204
+POST   /api/floor-plans/:floorPlanId/photos/presign      { filename, mimeType } → { uploadUrl, photo }
+DELETE /api/photos/:id                                  → 204 (also deletes from cloud storage)
 ```
 
 **GET /api/pins** returns the full nested structure for the logged-in user — pins with their floor plans, each floor plan with its amenities and photo URLs. This is the main data load on app startup.
@@ -164,12 +164,12 @@ Both methods open the edit panel for the new pin with one empty floor plan tab.
 
 ## Image Upload
 
-- Images uploaded as multipart/form-data to the server
-- Server stores image binary data directly in PostgreSQL (`Bytes` column)
-- Images served via `GET /api/photos/:id/image` which reads from DB and responds with the correct `Content-Type` header
+- **Upload flow:** Client requests a presigned upload URL from the server → server creates a Photo record and generates a presigned PUT URL for cloud storage → client uploads the file directly to cloud storage using the presigned URL
+- **Reading images:** Photo URLs stored in the database point to cloud storage. Frontend uses these URLs directly in `<img>` tags (no server proxy needed).
+- **Deletion:** Server deletes both the Photo record and the object from cloud storage
+- **Storage backend:** S3-compatible API (works with AWS S3, GCS, Azure Blob, MinIO for local dev)
 - Max file size: 10MB per image
 - Accepted formats: JPEG, PNG, WebP
-- **GET /api/pins** returns photo metadata (id, originalName) but not the binary data — images are loaded on demand via their individual endpoints
 
 ## Error Handling
 
