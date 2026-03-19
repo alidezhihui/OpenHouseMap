@@ -5,6 +5,7 @@ interface SidebarProps {
   onPinClick: (pin: Pin) => void;
   onClose: () => void;
   onPinHover?: (pinId: string | null) => void;
+  fullWidth?: boolean;
 }
 
 const AMENITY_COLORS: Record<string, string> = {
@@ -50,14 +51,14 @@ function collectAmenities(pin: Pin): string[] {
   return Array.from(seen).slice(0, 4);
 }
 
-export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: SidebarProps) {
+export default function Sidebar({ pins, onPinClick, onClose, onPinHover, fullWidth }: SidebarProps) {
   return (
     <div
       style={{
-        width: 240,
-        minWidth: 240,
+        width: fullWidth ? "100%" : 240,
+        minWidth: fullWidth ? undefined : 240,
         background: "#1e1e36",
-        borderLeft: "1px solid #333",
+        borderLeft: fullWidth ? undefined : "1px solid #333",
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -70,11 +71,11 @@ export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: Sideb
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "12px 14px",
+          padding: fullWidth ? "14px 16px" : "12px 14px",
           borderBottom: "1px solid #333",
         }}
       >
-        <span style={{ fontWeight: 600, fontSize: 14 }}>
+        <span style={{ fontWeight: 600, fontSize: fullWidth ? 16 : 14 }}>
           All Apartments ({pins.length})
         </span>
         <button
@@ -94,7 +95,7 @@ export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: Sideb
       </div>
 
       {/* Scrollable list */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "6px 0" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: fullWidth ? "8px 0" : "6px 0" }}>
         {pins.map((pin) => {
           const summary = formatPlanSummary(pin);
           const amenities = collectAmenities(pin);
@@ -103,8 +104,8 @@ export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: Sideb
               key={pin.id}
               onClick={() => onPinClick(pin)}
               style={{
-                padding: "10px 12px",
-                margin: "4px 8px",
+                padding: fullWidth ? "14px 16px" : "10px 12px",
+                margin: fullWidth ? "6px 12px" : "4px 8px",
                 borderRadius: 6,
                 borderLeft: `4px solid ${pin.color || "#888"}`,
                 background: "#28284a",
@@ -119,27 +120,27 @@ export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: Sideb
                 onPinHover?.(null);
               }}
             >
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>
+              <div style={{ fontWeight: 600, fontSize: fullWidth ? 15 : 13, marginBottom: fullWidth ? 4 : 2 }}>
                 📍 {pin.name}
               </div>
               {pin.address && (
-                <div style={{ color: "#999", fontSize: 11, marginBottom: 4 }}>
+                <div style={{ color: "#999", fontSize: fullWidth ? 13 : 11, marginBottom: fullWidth ? 6 : 4 }}>
                   {pin.address}
                 </div>
               )}
               {summary && (
-                <div style={{ fontSize: 11, color: "#ccc", marginBottom: 4 }}>
+                <div style={{ fontSize: fullWidth ? 13 : 11, color: "#ccc", marginBottom: fullWidth ? 6 : 4 }}>
                   {summary}
                 </div>
               )}
               {amenities.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: fullWidth ? 4 : 3 }}>
                   {amenities.map((label) => (
                     <span
                       key={label}
                       style={{
-                        fontSize: 9,
-                        padding: "1px 5px",
+                        fontSize: fullWidth ? 11 : 9,
+                        padding: fullWidth ? "2px 7px" : "1px 5px",
                         borderRadius: 3,
                         background: getAmenityColor(label),
                         color: "#1e1e36",

@@ -268,6 +268,7 @@ export default function MapPage() {
                 pins={pins}
                 onPinClick={handleSidebarPinClick}
                 onClose={() => setMobileTab("map")}
+                fullWidth
               />
             </div>
           )}
