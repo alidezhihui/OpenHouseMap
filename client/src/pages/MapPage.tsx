@@ -97,8 +97,10 @@ export default function MapPage() {
 
   const handleSidebarPinClick = (pin: Pin) => {
     setSelectedPin(pin);
-    setSidebarOpen(false);
-    if (isMobile) setMobileTab("map");
+    if (isMobile) {
+      setSidebarOpen(false);
+      setMobileTab("map");
+    }
   };
 
   const handleEdit = (pin: Pin) => {
