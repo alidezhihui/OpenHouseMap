@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import pinRoutes from "./routes/pins.js";
+import floorPlanRoutes from "./routes/floorPlans.js";
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", floorPlanRoutes);
 app.use("/api/pins", pinRoutes);
 
 export default app;
