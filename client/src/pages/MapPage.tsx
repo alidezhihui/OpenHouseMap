@@ -3,11 +3,13 @@ import { usePins } from "../hooks/usePins";
 import MapView from "../components/MapView";
 import TopBar from "../components/TopBar";
 import PinPopup from "../components/PinPopup";
+import EditPanel from "../components/EditPanel";
 import type { Pin } from "../types";
 
 export default function MapPage() {
-  const { pins, loading } = usePins();
+  const { pins, loading, refresh } = usePins();
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
+  const [editingPin, setEditingPin] = useState<Pin | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handlePinClick = (pin: Pin) => {
@@ -32,6 +34,21 @@ export default function MapPage() {
     setSidebarOpen((prev) => !prev);
   };
 
+  const handleEdit = (pin: Pin) => {
+    setEditingPin(pin);
+    setSelectedPin(null);
+  };
+
+  const handleEditClose = () => {
+    setEditingPin(null);
+    refresh();
+  };
+
+  // Find the latest version of the editing pin from refreshed pins
+  const currentEditingPin = editingPin
+    ? pins.find((p) => p.id === editingPin.id) ?? editingPin
+    : null;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <TopBar
@@ -49,14 +66,19 @@ export default function MapPage() {
           onMapClick={handleMapClick}
         />
 
-        {selectedPin && (
+        {selectedPin && !editingPin && (
           <PinPopup
             pin={selectedPin}
-            onEdit={(pin) => {
-              // TODO: wire to EditPanel in next task
-              console.log("Edit pin:", pin.id);
-            }}
+            onEdit={handleEdit}
             onClose={() => setSelectedPin(null)}
+          />
+        )}
+
+        {currentEditingPin && (
+          <EditPanel
+            pin={currentEditingPin}
+            onClose={handleEditClose}
+            onUpdate={refresh}
           />
         )}
       </div>
