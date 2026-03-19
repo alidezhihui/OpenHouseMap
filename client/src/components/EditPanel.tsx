@@ -68,10 +68,11 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
     onUpdate();
   };
 
-  const handleDeleteTab = async () => {
-    if (!activeFp || pin.floorPlans.length <= 1) return;
+  const handleDeleteTab = async (index: number) => {
+    const fp = pin.floorPlans[index];
+    if (!fp || pin.floorPlans.length <= 1) return;
     try {
-      await deleteFloorPlan(activeFp.id);
+      await deleteFloorPlan(fp.id);
       showToast("Floor plan deleted");
       setActiveTab(0);
       onUpdate();
@@ -176,6 +177,7 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
         activeIndex={activeTab}
         onTabClick={handleTabClick}
         onAddTab={handleAddTab}
+        onDeleteTab={handleDeleteTab}
         showAdd
       />
 
@@ -255,22 +257,6 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
           Save
         </button>
 
-        {activeFp && pin.floorPlans.length > 1 && (
-          <button
-            onClick={handleDeleteTab}
-            style={{
-              background: "#7f1d1d",
-              color: "#fca5a5",
-              border: "none",
-              borderRadius: 4,
-              padding: "8px 12px",
-              fontSize: 12,
-              cursor: "pointer",
-            }}
-          >
-            Delete Tab
-          </button>
-        )}
       </div>
 
       {/* Delete Pin */}
