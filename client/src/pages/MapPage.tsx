@@ -2,6 +2,7 @@ import { useState } from "react";
 import { usePins } from "../hooks/usePins";
 import { useIsMobile } from "../hooks/useMediaQuery";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../components/Toast";
 import MapView from "../components/MapView";
 import TopBar from "../components/TopBar";
 import PinPopup from "../components/PinPopup";
@@ -17,6 +18,7 @@ type MobileTab = "map" | "list" | "account";
 export default function MapPage() {
   const { pins, loading, refresh } = usePins();
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const isMobile = useIsMobile();
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const [editingPin, setEditingPin] = useState<Pin | null>(null);
@@ -49,14 +51,19 @@ export default function MapPage() {
       // fallback to "Unnamed Location"
     }
 
-    const newPin = await createPin({
-      name: "New Apartment",
-      address,
-      latitude: lat,
-      longitude: lng,
-    });
-    await refresh();
-    setEditingPin(newPin);
+    try {
+      const newPin = await createPin({
+        name: "New Apartment",
+        address,
+        latitude: lat,
+        longitude: lng,
+      });
+      showToast("Pin added");
+      await refresh();
+      setEditingPin(newPin);
+    } catch {
+      showToast("Failed to add pin", "error");
+    }
   };
 
   const handleAddressSelect = async (
@@ -64,14 +71,19 @@ export default function MapPage() {
     lat: number,
     lng: number,
   ) => {
-    const newPin = await createPin({
-      name: "New Apartment",
-      address,
-      latitude: lat,
-      longitude: lng,
-    });
-    await refresh();
-    setEditingPin(newPin);
+    try {
+      const newPin = await createPin({
+        name: "New Apartment",
+        address,
+        latitude: lat,
+        longitude: lng,
+      });
+      showToast("Pin added");
+      await refresh();
+      setEditingPin(newPin);
+    } catch {
+      showToast("Failed to add pin", "error");
+    }
   };
 
   const handleAddPin = () => {

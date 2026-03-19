@@ -3,6 +3,7 @@ import type { Pin, FloorPlan } from "../types";
 import FloorPlanTabs from "./FloorPlanTabs";
 import PhotoGallery from "./PhotoGallery";
 import AmenityChecklist from "./AmenityChecklist";
+import { useToast } from "./Toast";
 import { updatePin, deletePin } from "../services/pins";
 import {
   createFloorPlan,
@@ -17,6 +18,7 @@ interface EditPanelProps {
 }
 
 export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState(0);
 
   // Building-level fields
@@ -40,20 +42,25 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
   }, [activeTab, activeFp?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = async () => {
-    // Save building-level fields
-    await updatePin(pin.id, { name, address });
+    try {
+      // Save building-level fields
+      await updatePin(pin.id, { name, address });
 
-    // Save active floor plan fields
-    if (activeFp) {
-      await updateFloorPlan(activeFp.id, {
-        name: planName,
-        rent: rent === "" ? null : Number(rent),
-        notes,
-      });
+      // Save active floor plan fields
+      if (activeFp) {
+        await updateFloorPlan(activeFp.id, {
+          name: planName,
+          rent: rent === "" ? null : Number(rent),
+          notes,
+        });
+      }
+
+      showToast("Changes saved");
+      onUpdate();
+      onClose();
+    } catch {
+      showToast("Failed to save", "error");
     }
-
-    onUpdate();
-    onClose();
   };
 
   const handleAddTab = async () => {
@@ -63,9 +70,14 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
 
   const handleDeleteTab = async () => {
     if (!activeFp || pin.floorPlans.length <= 1) return;
-    await deleteFloorPlan(activeFp.id);
-    setActiveTab(0);
-    onUpdate();
+    try {
+      await deleteFloorPlan(activeFp.id);
+      showToast("Floor plan deleted");
+      setActiveTab(0);
+      onUpdate();
+    } catch {
+      showToast("Failed to save", "error");
+    }
   };
 
   const handleTabClick = (index: number) => {
@@ -269,9 +281,14 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
               "Delete this apartment and all its floor plans?",
             )
           ) {
-            await deletePin(pin.id);
-            onUpdate();
-            onClose();
+            try {
+              await deletePin(pin.id);
+              showToast("Apartment deleted");
+              onUpdate();
+              onClose();
+            } catch {
+              showToast("Failed to save", "error");
+            }
           }
         }}
         style={{
