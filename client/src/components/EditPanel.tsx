@@ -3,7 +3,7 @@ import type { Pin, FloorPlan } from "../types";
 import FloorPlanTabs from "./FloorPlanTabs";
 import PhotoGallery from "./PhotoGallery";
 import AmenityChecklist from "./AmenityChecklist";
-import { updatePin } from "../services/pins";
+import { updatePin, deletePin } from "../services/pins";
 import {
   createFloorPlan,
   updateFloorPlan,
@@ -260,6 +260,35 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
           </button>
         )}
       </div>
+
+      {/* Delete Pin */}
+      <button
+        onClick={async () => {
+          if (
+            window.confirm(
+              "Delete this apartment and all its floor plans?",
+            )
+          ) {
+            await deletePin(pin.id);
+            onUpdate();
+            onClose();
+          }
+        }}
+        style={{
+          width: "100%",
+          background: "#991b1b",
+          color: "#fca5a5",
+          border: "1px solid #dc2626",
+          borderRadius: 4,
+          padding: "8px 0",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          marginTop: 4,
+        }}
+      >
+        Delete Pin
+      </button>
     </div>
   );
 }
