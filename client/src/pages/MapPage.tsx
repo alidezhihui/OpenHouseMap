@@ -5,6 +5,7 @@ import TopBar from "../components/TopBar";
 import PinPopup from "../components/PinPopup";
 import EditPanel from "../components/EditPanel";
 import Sidebar from "../components/Sidebar";
+import { createPin } from "../services/pins";
 import type { Pin } from "../types";
 
 export default function MapPage() {
@@ -17,18 +18,55 @@ export default function MapPage() {
     setSelectedPin(pin);
   };
 
-  const handleMapClick = (_lat: number, _lng: number) => {
+  const [addPinMode, setAddPinMode] = useState(false);
+
+  const handleMapClick = async (lat: number, lng: number) => {
     setSelectedPin(null);
+
+    if (!addPinMode) return;
+    setAddPinMode(false);
+
+    // Reverse geocode via Nominatim
+    let address = "Unnamed Location";
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+      );
+      const json = await res.json();
+      if (json.display_name) {
+        address = json.display_name;
+      }
+    } catch {
+      // fallback to "Unnamed Location"
+    }
+
+    const newPin = await createPin({
+      name: "New Apartment",
+      address,
+      latitude: lat,
+      longitude: lng,
+    });
+    await refresh();
+    setEditingPin(newPin);
   };
 
-  const handleAddressSelect = (address: string, lat: number, lng: number) => {
-    // TODO: fly/center the map to the selected address
-    console.log("Address selected:", address, lat, lng);
+  const handleAddressSelect = async (
+    address: string,
+    lat: number,
+    lng: number,
+  ) => {
+    const newPin = await createPin({
+      name: "New Apartment",
+      address,
+      latitude: lat,
+      longitude: lng,
+    });
+    await refresh();
+    setEditingPin(newPin);
   };
 
   const handleAddPin = () => {
-    // TODO: open add-pin flow
-    console.log("Add pin clicked");
+    setAddPinMode(true);
   };
 
   const handleToggleSidebar = () => {
@@ -72,6 +110,29 @@ export default function MapPage() {
             onPinClick={handlePinClick}
             onMapClick={handleMapClick}
           />
+
+          {addPinMode && (
+            <div
+              style={{
+                position: "absolute",
+                top: 12,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "#3b82f6",
+                color: "#fff",
+                padding: "8px 16px",
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                zIndex: 1002,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                cursor: "pointer",
+              }}
+              onClick={() => setAddPinMode(false)}
+            >
+              Click on the map to place a pin (click here to cancel)
+            </div>
+          )}
 
           {selectedPin && !editingPin && (
             <PinPopup
