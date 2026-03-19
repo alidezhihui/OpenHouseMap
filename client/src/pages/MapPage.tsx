@@ -2,6 +2,7 @@ import { useState } from "react";
 import { usePins } from "../hooks/usePins";
 import MapView from "../components/MapView";
 import TopBar from "../components/TopBar";
+import PinPopup from "../components/PinPopup";
 import type { Pin } from "../types";
 
 export default function MapPage() {
@@ -47,6 +48,17 @@ export default function MapPage() {
           onPinClick={handlePinClick}
           onMapClick={handleMapClick}
         />
+
+        {selectedPin && (
+          <PinPopup
+            pin={selectedPin}
+            onEdit={(pin) => {
+              // TODO: wire to EditPanel in next task
+              console.log("Edit pin:", pin.id);
+            }}
+            onClose={() => setSelectedPin(null)}
+          />
+        )}
       </div>
     </div>
   );
