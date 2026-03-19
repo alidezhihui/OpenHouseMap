@@ -4,6 +4,7 @@ import MapView from "../components/MapView";
 import TopBar from "../components/TopBar";
 import PinPopup from "../components/PinPopup";
 import EditPanel from "../components/EditPanel";
+import Sidebar from "../components/Sidebar";
 import type { Pin } from "../types";
 
 export default function MapPage() {
@@ -34,6 +35,11 @@ export default function MapPage() {
     setSidebarOpen((prev) => !prev);
   };
 
+  const handleSidebarPinClick = (pin: Pin) => {
+    setSelectedPin(pin);
+    setSidebarOpen(false);
+  };
+
   const handleEdit = (pin: Pin) => {
     setEditingPin(pin);
     setSelectedPin(null);
@@ -58,27 +64,37 @@ export default function MapPage() {
         pinCount={loading ? 0 : pins.length}
       />
 
-      {/* Map */}
-      <div style={{ flex: 1, position: "relative" }}>
-        <MapView
-          pins={pins}
-          onPinClick={handlePinClick}
-          onMapClick={handleMapClick}
-        />
-
-        {selectedPin && !editingPin && (
-          <PinPopup
-            pin={selectedPin}
-            onEdit={handleEdit}
-            onClose={() => setSelectedPin(null)}
+      {/* Map + Sidebar row */}
+      <div style={{ flex: 1, display: "flex", position: "relative" }}>
+        <div style={{ flex: 1, position: "relative" }}>
+          <MapView
+            pins={pins}
+            onPinClick={handlePinClick}
+            onMapClick={handleMapClick}
           />
-        )}
 
-        {currentEditingPin && (
-          <EditPanel
-            pin={currentEditingPin}
-            onClose={handleEditClose}
-            onUpdate={refresh}
+          {selectedPin && !editingPin && (
+            <PinPopup
+              pin={selectedPin}
+              onEdit={handleEdit}
+              onClose={() => setSelectedPin(null)}
+            />
+          )}
+
+          {currentEditingPin && (
+            <EditPanel
+              pin={currentEditingPin}
+              onClose={handleEditClose}
+              onUpdate={refresh}
+            />
+          )}
+        </div>
+
+        {sidebarOpen && (
+          <Sidebar
+            pins={pins}
+            onPinClick={handleSidebarPinClick}
+            onClose={() => setSidebarOpen(false)}
           />
         )}
       </div>
