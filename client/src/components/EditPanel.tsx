@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Pin, FloorPlan } from "../types";
 import FloorPlanTabs from "./FloorPlanTabs";
 import PhotoGallery from "./PhotoGallery";
 import AmenityChecklist from "./AmenityChecklist";
+import type { AmenityChecklistHandle } from "./AmenityChecklist";
 import { useToast } from "./Toast";
 import { updatePin, deletePin } from "../services/pins";
 import {
@@ -20,6 +21,7 @@ interface EditPanelProps {
 export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState(0);
+  const amenityRef = useRef<AmenityChecklistHandle>(null);
 
   // Building-level fields
   const [name, setName] = useState(pin.name);
@@ -54,6 +56,9 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
           notes,
         });
       }
+
+      // Flush pending amenity deletions
+      await amenityRef.current?.flushDeletions();
 
       showToast("Changes saved");
       onUpdate();
@@ -225,6 +230,7 @@ export default function EditPanel({ pin, onClose, onUpdate }: EditPanelProps) {
 
           {/* Amenity Checklist */}
           <AmenityChecklist
+            ref={amenityRef}
             amenities={activeFp.amenities}
             floorPlanId={activeFp.id}
             onUpdate={onUpdate}
