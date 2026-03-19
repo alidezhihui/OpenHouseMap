@@ -23,6 +23,7 @@ export default function MapPage() {
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const [editingPin, setEditingPin] = useState<Pin | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<MobileTab>("map");
 
   const handlePinClick = (pin: Pin) => {
@@ -342,6 +343,7 @@ export default function MapPage() {
             pins={pins}
             onPinClick={handlePinClick}
             onMapClick={handleMapClick}
+            highlightedPinId={hoveredPinId ?? undefined}
           />
 
           {addPinMode && (
@@ -389,6 +391,7 @@ export default function MapPage() {
             pins={pins}
             onPinClick={handleSidebarPinClick}
             onClose={() => setSidebarOpen(false)}
+            onPinHover={setHoveredPinId}
           />
         )}
       </div>

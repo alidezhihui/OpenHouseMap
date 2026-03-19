@@ -16,11 +16,32 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const defaultIcon = new L.Icon({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+const highlightedIcon = new L.Icon({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [30, 49],
+  iconAnchor: [15, 49],
+  popupAnchor: [1, -40],
+  shadowSize: [49, 49],
+});
+
 interface MapViewProps {
   pins: Pin[];
   onPinClick: (pin: Pin) => void;
   onMapClick: (lat: number, lng: number) => void;
   center?: [number, number];
+  highlightedPinId?: string;
 }
 
 function MapClickHandler({ onClick }: { onClick: (lat: number, lng: number) => void }) {
@@ -37,6 +58,7 @@ export default function MapView({
   onPinClick,
   onMapClick,
   center = [47.674, -122.121],
+  highlightedPinId,
 }: MapViewProps) {
   return (
     <MapContainer
@@ -53,6 +75,7 @@ export default function MapView({
         <Marker
           key={pin.id}
           position={[pin.latitude, pin.longitude]}
+          icon={pin.id === highlightedPinId ? highlightedIcon : defaultIcon}
           eventHandlers={{ click: () => onPinClick(pin) }}
         />
       ))}

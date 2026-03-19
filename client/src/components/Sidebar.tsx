@@ -4,6 +4,7 @@ interface SidebarProps {
   pins: Pin[];
   onPinClick: (pin: Pin) => void;
   onClose: () => void;
+  onPinHover?: (pinId: string | null) => void;
 }
 
 const AMENITY_COLORS: Record<string, string> = {
@@ -49,7 +50,7 @@ function collectAmenities(pin: Pin): string[] {
   return Array.from(seen).slice(0, 4);
 }
 
-export default function Sidebar({ pins, onPinClick, onClose }: SidebarProps) {
+export default function Sidebar({ pins, onPinClick, onClose, onPinHover }: SidebarProps) {
   return (
     <div
       style={{
@@ -109,12 +110,14 @@ export default function Sidebar({ pins, onPinClick, onClose }: SidebarProps) {
                 background: "#28284a",
                 cursor: "pointer",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#32326a")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#28284a")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#32326a";
+                onPinHover?.(pin.id);
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#28284a";
+                onPinHover?.(null);
+              }}
             >
               <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>
                 📍 {pin.name}
