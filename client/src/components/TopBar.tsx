@@ -6,6 +6,7 @@ interface TopBarProps {
   onAddPin: () => void;
   onToggleSidebar: () => void;
   pinCount: number;
+  hideSidebarToggle?: boolean;
 }
 
 export default function TopBar({
@@ -13,6 +14,7 @@ export default function TopBar({
   onAddPin,
   onToggleSidebar,
   pinCount,
+  hideSidebarToggle,
 }: TopBarProps) {
   const { user, logout } = useAuth();
 
@@ -51,18 +53,22 @@ export default function TopBar({
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* Add Pin button */}
-      <button onClick={onAddPin} style={buttonStyle}>
-        + Add Pin
-      </button>
+      {/* Add Pin button — hidden on mobile (uses FAB instead) */}
+      {!hideSidebarToggle && (
+        <button onClick={onAddPin} style={buttonStyle}>
+          + Add Pin
+        </button>
+      )}
 
-      {/* Sidebar toggle */}
-      <button onClick={onToggleSidebar} style={buttonStyle}>
-        ☰ List ({pinCount})
-      </button>
+      {/* Sidebar toggle — hidden on mobile (uses BottomNav) */}
+      {!hideSidebarToggle && (
+        <button onClick={onToggleSidebar} style={buttonStyle}>
+          ☰ List ({pinCount})
+        </button>
+      )}
 
-      {/* User info + logout */}
-      {user && (
+      {/* User info + logout — hidden on mobile (uses Account tab) */}
+      {!hideSidebarToggle && user && (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 13, color: "#94a3b8", whiteSpace: "nowrap" }}>
             {user.email}
