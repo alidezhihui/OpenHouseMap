@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
+import pinRoutes from "./routes/pins.js";
 
 const app = express();
 
@@ -12,5 +13,6 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/pins", pinRoutes);
 
 export default app;
